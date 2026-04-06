@@ -1,0 +1,16 @@
+{
+  "name": "masters-pool-2026",
+  "version": "1.0.0",
+  "description": "GFL Fantasy Golf Draft Pool — Masters 2026",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.37.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

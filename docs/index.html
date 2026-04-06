@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GFL Masters 2026 — Draft Pool</title>
+  <!--
+    VERCEL API URL — update this after deploying to Vercel:
+    Change content="" to your Vercel deployment URL, e.g.:
+    content="https://masters-pool-2026.vercel.app"
+  -->
+  <meta name="api-base" content="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="header-badge">2026</div>
+      <h1>Masters Pool</h1>
+      <p class="header-sub">GFL Fantasy Golf — Augusta National</p>
+    </div>
+  </header>
+
+  <!-- NAV TABS -->
+  <nav id="main-nav">
+    <button class="nav-btn active" data-view="draft">Draft Board</button>
+    <button class="nav-btn" data-view="standings">Standings</button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="app">
+
+    <!-- ══════════════════════════════════════════
+         DRAFT VIEW
+    ══════════════════════════════════════════ -->
+    <section id="view-draft" class="view active">
+
+      <!-- Draft complete banner -->
+      <div id="draft-complete-banner" class="hidden">
+        <div class="complete-card">
+          <div class="complete-icon">⛳</div>
+          <h2>Draft Complete!</h2>
+          <p>All 20 picks have been made. Good luck out there.</p>
+          <button class="btn-primary" onclick="switchView('standings')">View Standings →</button>
+        </div>
+      </div>
+
+      <!-- Active draft UI -->
+      <div id="draft-active">
+        <!-- On the clock card -->
+        <div class="clock-card">
+          <div class="clock-label">Now Picking</div>
+          <div class="clock-pick-num" id="clock-pick-num">Pick 1 of 20</div>
+          <div class="clock-player" id="clock-player">—</div>
+          <div class="clock-sub" id="clock-sub">Select your name to make a pick</div>
+        </div>
+
+        <!-- Name selector -->
+        <div class="section-label">I am…</div>
+        <div id="name-selector" class="name-pills"></div>
+
+        <!-- Pick panel (shown when name matches current player) -->
+        <div id="pick-panel" class="hidden">
+          <div class="section-label">Choose a golfer</div>
+          <div class="search-wrapper">
+            <input
+              id="golfer-search"
+              type="text"
+              placeholder="Search golfers…"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+            />
+            <span class="search-icon">⌕</span>
+          </div>
+          <div id="golfer-grid" class="golfer-grid"></div>
+        </div>
+
+        <!-- Not your turn panel -->
+        <div id="not-your-turn" class="hidden">
+          <div class="waiting-msg">
+            <span id="waiting-text">It's not your turn yet.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Draft board (always visible) -->
+      <div class="section-label" style="margin-top: 2rem;">Draft Board</div>
+      <div class="draft-board-wrapper">
+        <table class="draft-table" id="draft-board-table">
+          <thead>
+            <tr>
+              <th>Pick</th>
+              <th>Player</th>
+              <th>Golfer</th>
+              <th>Groups</th>
+            </tr>
+          </thead>
+          <tbody id="draft-board-body">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         STANDINGS VIEW
+    ══════════════════════════════════════════ -->
+    <section id="view-standings" class="view hidden">
+
+      <div class="standings-header">
+        <div>
+          <h2 class="standings-title">Live Standings</h2>
+          <div id="standings-meta" class="standings-meta">—</div>
+        </div>
+        <button class="btn-refresh" id="refresh-btn" onclick="loadStandings()">
+          <span class="refresh-icon">↻</span> Refresh
+        </button>
+      </div>
+
+      <!-- Error banner -->
+      <div id="standings-error" class="error-banner hidden"></div>
+
+      <!-- Leaderboard grid -->
+      <div id="groups-grid" class="groups-grid"></div>
+
+      <!-- Player summaries -->
+      <div class="section-label" style="margin-top: 2.5rem;">My Picks</div>
+      <div id="player-summaries" class="player-summaries"></div>
+
+      <!-- Standings loading state -->
+      <div id="standings-loading" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Fetching live Masters data…</p>
+      </div>
+
+      <!-- Not started state -->
+      <div id="standings-empty" class="empty-state hidden">
+        <p>Complete the draft to see standings.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Admin panel (hidden by default) -->
+  <div id="admin-panel" class="admin-panel hidden">
+    <div class="admin-inner">
+      <h3>Admin Reset</h3>
+      <p>This will wipe all picks and restart the draft.</p>
+      <input id="admin-password" type="password" placeholder="Password" />
+      <div class="admin-btns">
+        <button class="btn-danger" onclick="adminReset()">Reset Draft</button>
+        <button class="btn-ghost" onclick="toggleAdmin()">Cancel</button>
+      </div>
+      <div id="admin-msg" class="admin-msg"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <span>GFL Masters Pool 2026</span>
+    <button class="admin-trigger" onclick="toggleAdmin()">⚙</button>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
