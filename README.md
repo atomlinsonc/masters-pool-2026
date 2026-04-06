@@ -1,42 +1,53 @@
 # GFL Masters 2026 — Draft Pool
 
-A full-stack fantasy golf draft app for the 2026 Masters Tournament, hosted on Vercel.
+**GitHub Pages (frontend):** https://atomlinsonc.github.io/masters-pool-2026/
+**GitHub Repo:** https://github.com/atomlinsonc/masters-pool-2026
 
-## Quick Start (Local Dev)
+A full-stack fantasy golf draft app for the 2026 Masters Tournament.
 
-```bash
-cd masters-pool
-npm install
-npm run dev
-# opens at http://localhost:3000
-```
-
-Locally, draft picks are stored in `drafts.json`. No database setup needed.
+- **Frontend** → GitHub Pages (static, served from `docs/`)
+- **Backend API** → Vercel (serverless functions in `api/`)
+- **Storage** → Upstash Redis (on Vercel) or `drafts.json` (local dev)
 
 ---
 
-## Deploy to Vercel
+## Deploy the Backend to Vercel
 
-### 1. Install Vercel CLI
-```bash
-npm i -g vercel
-```
+### Step 1 — Import repo into Vercel
 
-### 2. Set up Upstash Redis (for persistent storage on Vercel)
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Click **"Import Git Repository"** → select `masters-pool-2026`
+3. Leave all settings as default (Vercel auto-detects Node.js)
+4. Click **Deploy** — you'll get a URL like `https://masters-pool-2026.vercel.app`
 
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Open your project → **Integrations** tab → search for **Upstash Redis** → Add
-3. Create a free Redis database (select the region closest to you)
-4. Click **Connect to Project** — Vercel auto-injects:
+### Step 2 — Add Upstash Redis (persistent storage)
+
+1. In your Vercel project → **Integrations** tab
+2. Search for **Upstash Redis** → Add → Create a free Redis database
+3. Click **Connect to Project** — Vercel injects these env vars automatically:
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`
 
-> **Without Upstash:** The app falls back to `drafts.json` (local only — won't persist across Vercel function invocations).
+### Step 3 — Point GitHub Pages at your Vercel URL
 
-### 3. Deploy
-```bash
-npm run deploy
+Edit one line in `docs/index.html`:
+
+```html
+<!-- Change this: -->
+<meta name="api-base" content="" />
+
+<!-- To this (your actual Vercel URL): -->
+<meta name="api-base" content="https://masters-pool-2026.vercel.app" />
 ```
+
+Then commit and push:
+```bash
+git add docs/index.html
+git commit -m "Set Vercel API base URL"
+git push
+```
+
+GitHub Pages updates automatically within ~60 seconds.
 
 ---
 
@@ -54,9 +65,7 @@ npm run deploy
 
 ## Admin Reset
 
-1. Click the **⚙** icon in the footer
-2. Enter password: `masters2026`
-3. Confirm reset
+Click the **⚙** icon in the footer → enter password `masters2026`.
 
 Or via curl:
 ```bash
@@ -69,40 +78,63 @@ curl -X POST https://your-app.vercel.app/api/admin \
 
 ## Live Scores
 
-Standings pull from the ESPN free API:
+Standings pull from the ESPN free API — no API key required:
 ```
 https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga
 ```
 
-No API key required. If the Masters hasn't started or the API is down, the app shows a graceful error banner and displays the draft order without scores.
-
----
-
-## Draft Structure
-
-20 picks across 6 players (Austin, Casey, Mike, Kenny, Tyler, Lev). Each pick contributes to one or more of 4 group leaderboards. The draft order and group assignments are fixed in `lib/data.js`.
+If the Masters hasn't started or ESPN is down, the app shows a graceful error banner with the draft order only.
 
 ---
 
 ## File Structure
 
 ```
-masters-pool/
+masters-pool-2026/
 ├── api/
-│   ├── draft.js        ← GET + POST draft
+│   ├── draft.js        ← GET + POST draft picks
 │   ├── field.js        ← GET available golfers
-│   ├── standings.js    ← GET group leaderboards
-│   └── admin.js        ← POST reset
+│   ├── standings.js    ← GET group leaderboards + live ESPN data
+│   └── admin.js        ← POST reset (password protected)
 ├── lib/
-│   ├── data.js         ← Draft order, golfer pool
-│   ├── storage.js      ← KV / JSON file abstraction
-│   └── espn.js         ← ESPN API fetcher + name matcher
-├── public/
+│   ├── data.js         ← Fixed draft order, golfer pool, group assignments
+│   ├── storage.js      ← Upstash Redis / JSON file abstraction
+│   └── espn.js         ← ESPN API fetcher + fuzzy name matcher
+├── docs/               ← GitHub Pages frontend
 │   ├── index.html
 │   ├── style.css
 │   └── app.js
-├── drafts.json         ← Local dev storage (auto-created)
-├── vercel.json
+├── .gitignore
 ├── package.json
+├── vercel.json
 └── README.md
 ```
+
+---
+
+## Draft Structure (fixed)
+
+20 picks across 6 players. Each pick contributes to one or more of 4 group leaderboards.
+
+| Pick | Player | Groups |
+|------|--------|--------|
+| 1 | Austin | 1, 2, 4 |
+| 2 | Casey | 1, 2, 3, 4 |
+| 3 | Mike | 1, 3, 4 |
+| 4 | Mike | 1, 3, 4 |
+| 5 | Casey | 1, 2, 3, 4 |
+| 6 | Austin | 1, 2, 4 |
+| 7 | Austin | 2 |
+| 8 | Casey | 2 |
+| 9 | Casey | 2 |
+| 10 | Austin | 3 |
+| 11 | Kenny | 3 |
+| 12 | Tyler | 3 |
+| 13 | Mike | 3 |
+| 14 | Mike | 3 |
+| 15 | Tyler | 3 |
+| 16 | Kenny | 3 |
+| 17 | Lev | 4 |
+| 18 | Tyler | 4 |
+| 19 | Tyler | 4 |
+| 20 | Lev | 4 |
