@@ -18,7 +18,18 @@ module.exports = async (req, res) => {
 
   try {
     const draft = await getDraft();
-    const picks = draft.picks || [];
+    const rawPicks = draft.picks || [];
+
+    // Always use DRAFT_ORDER as the source of truth for group assignments
+    // (stored picks may have stale groups if reassignments happen after drafting)
+    const draftOrderMap = {};
+    for (const d of DRAFT_ORDER) {
+      draftOrderMap[d.pick] = d.groups;
+    }
+    const picks = rawPicks.map((p) => ({
+      ...p,
+      groups: draftOrderMap[p.pickNumber] || p.groups,
+    }));
 
     // Fetch live ESPN data
     let espnData = null;
